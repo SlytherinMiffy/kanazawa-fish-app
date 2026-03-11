@@ -342,7 +342,7 @@ export function Game() {
             {/* ゲーム選択画面へ戻るボタン (Mapの左上に固定) */}
             <div className="absolute top-4 left-4 z-[400]">
                 <button
-                    onClick={() => navigate('/game-select')}
+                    onClick={() => navigate('/')}
                     className="bg-white/90 px-4 py-2 rounded-full shadow-lg text-orange-600 font-bold hover:bg-orange-50 transition-colors"
                 >
                     ◀ 戻る

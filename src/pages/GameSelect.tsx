@@ -1,4 +1,3 @@
-import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Gamepad2, Map as MapIcon, ArrowLeft } from 'lucide-react';
 
