@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>金沢フィッシングGO（上下左右2Dアクション版）</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <style>
+        body { margin: 0; padding: 0; font-family: 'Helvetica Neue', Arial, sans-serif; overflow: hidden; }
+        
+        #map { height: 100vh; width: 100%; z-index: 1; }
+
+        /* --- カスタム浮き --- */
+        .custom-float-icon { background: transparent; border: none; }
+        .float-body {
+            width: 30px; height: 30px; border-radius: 50%; border: 2px solid #333;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.5); position: relative; overflow: hidden;
+            cursor: pointer; transition: transform 0.2s;
+        }
+        .float-body:hover { transform: scale(1.2); }
+        .float-top { width: 100%; height: 50%; background-color: #ff3333; }
+        .float-bottom { width: 100%; height: 50%; background-color: #ffeb3b; }
+        .float-line {
+            position: absolute; top: 50%; left: 0; width: 100%; height: 4px;
+            background-color: #333; transform: translateY(-50%);
+        }
+
+        /* --- ゲーム画面 --- */
+        #game-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); z-index: 1000;
+            justify-content: center; align-items: center; flex-direction: column;
+            touch-action: none; /* スワイプ時の画面スクロールを防止 */
+        }
+
+        #close-btn {
+            position: absolute; top: 30px; right: 30px; width: 50px; height: 50px;
+            background: white; color: #333; border-radius: 50%;
+            font-size: 30px; font-weight: bold; display: flex; justify-content: center;
+            align-items: center; cursor: pointer; box-shadow: 0 2px 10px rgba(0,0,0,0.5);
+            z-index: 1001; user-select: none;
+        }
+        #close-btn:active { transform: scale(0.9); background: #eee; }
+
+        /* 釣りエリアを横に広くしました (100px -> 300px) */
+        .fishing-container {
+            position: relative; width: 300px; height: 400px; background: #2a2a2a;
+            border: 4px solid #8b4513; border-radius: 10px; overflow: hidden;
+            margin-right: 20px; transition: border-color 0.5s;
+        }
+
+        .danger-border { animation: blink-border 1s infinite; }
+        @keyframes blink-border {
+            0% { border-color: #8b4513; }
+            50% { border-color: red; }
+            100% { border-color: #8b4513; }
+        }
+
+        .water-bg {
+            width: 100%; height: 100%; opacity: 0.3;
+            background: linear-gradient(to bottom, #4facfe 0%, #00f2fe 100%);
+        }
+
+        /* 捕獲枠（プレイヤー操作） */
+        #capture-bar {
+            position: absolute; left: 100px; width: 70px; height: 90px; 
+            background-color: rgba(100, 255, 100, 0.4); /* 見やすいように少し透明に */
+            border: 3px solid #4caf50; border-radius: 10px; pointer-events: none;
+            box-sizing: border-box;
+        }
+
+        /* 魚アイコン */
+        #fish-icon {
+            position: absolute; left: 125px; width: 50px; height: 50px;
+            background-color: #333; border-radius: 50%; display: flex;
+            justify-content: center; align-items: center; font-size: 24px;
+            color: white; pointer-events: none;
+        }
+
+        .status-area {
+            display: flex; flex-direction: column; align-items: center;
+            height: 400px; justify-content: flex-end;
+        }
+
+        #progress-container {
+            position: relative; width: 30px; height: 400px; background: #444;
+            border: 2px solid #fff; border-radius: 5px; overflow: hidden;
+        }
+
+        #progress-bar {
+            position: absolute; bottom: 0; width: 100%; height: 0%;
+            background: linear-gradient(to top, red, yellow, lime); transition: height 0.1s linear;
+        }
+
+        #game-info { color: white; margin-bottom: 20px; text-align: center; font-size: 1.2rem; pointer-events: none; }
+        #warning-text { color: red; font-weight: bold; height: 1.5em; opacity: 0; transition: opacity 0.5s; }
+        
+        /* リザルト画面 */
+        #result-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); z-index: 2000;
+            justify-content: center; align-items: center;
+        }
+        #result-box {
+            background: white; padding: 30px; border-radius: 15px; text-align: center;
+            max-width: 80%; width: 320px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        #result-image {
+            width: 100%; height: 200px; 
+            object-fit: contain; /* はみ出さずに全体を表示する修正！ */
+            margin-bottom: 15px; border-radius: 8px; background-color: #eee;
+        }
+        #result-text { color: #333; font-size: 1.5rem; margin-bottom: 25px; font-weight: bold; }
+        button#result-close-btn {
+            padding: 12px 40px; font-size: 18px; background: #4caf50; color: white;
+            border: none; border-radius: 50px; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+        }
+        button#result-close-btn:active { background: #388e3c; transform: translateY(2px); }
+
+        .guide-text { color: #ccc; margin-top: 15px; font-size: 1rem; text-align: center; pointer-events: none; }
+    </style>
+</head>
+<body>
+
+    <div id="map"></div>
+
+    <div id="game-overlay">
+        <div id="close-btn" onclick="quitGame()">×</div>
+        <div id="game-info">
+            <h2 id="target-fish-name"></h2>
+            <p id="warning-text">⚠ 魚が警戒しています！</p>
+        </div>
+        
+        <div style="display: flex; align-items: flex-end;">
+            <div class="fishing-container" id="fishing-box">
+                <div class="water-bg"></div>
+                <div id="fish-icon">🐟</div>
+                <div id="capture-bar"></div>
+            </div>
+            <div class="status-area">
+                <div id="progress-container">
+                    <div id="progress-bar"></div>
+                </div>
+            </div>
+        </div>
+        
+        <p class="guide-text">
+            👆 画面を<b>長押し</b>すると上に引き上げます<br>
+            👈 指を左右に<b>スライド</b>すると枠が横に動きます 👉
+        </p>
+    </div>
+
+    <div id="result-overlay">
+        <div id="result-box">
+            <img id="result-image" src="" alt="結果画像">
+            <div id="result-text"></div>
+            <button id="result-close-btn" onclick="closeResult()" type="button">閉じる</button>
+        </div>
+    </div>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+    <script>
+        // --- 魚データ ---
+        const FISH_DATA = [
+            { name: "アジ", grade: 1, difficulty: 1.0, speed: 2.5, image: "aji.png" },
+            { name: "カレイ", grade: 2, difficulty: 1.5, speed: 3.0, image: "karei.png" },
+            { name: "甘エビ", grade: 2, difficulty: 1.7, speed: 3.5, image: "amaebi.png" },
+            { name: "アオリイカ", grade: 3, difficulty: 2.0, speed: 4.0, image: "aoriika.png" },
+            { name: "ブリ", grade: 4, difficulty: 2.5, speed: 6.0, image: "buri.png" },
+            { name: "のどぐろ", grade: 5, difficulty: 3.0, speed: 8.0, image: "nodoguro.png" } 
+        ];
+
+        // 逃がした時の専用画像
+        const ESCAPE_IMAGE = "mizusibuki.png";
+        const TIME_LIMIT = 40;
+
+// --- 指定された住所の座標リスト ---
+        const SPAWN_LOCATIONS = [
+            { lat: 36.5861, lng: 136.6320, name: "西念4丁目14番地8号" },
+            { lat: 36.5615, lng: 136.6558, name: "柿木畠4-6" },
+            { lat: 36.5868, lng: 136.6325, name: "西念4丁目15-1 水産仲卸センター" },
+            { lat: 36.5701, lng: 136.6550, name: "下堤町38" },
+            { lat: 36.5714, lng: 136.6515, name: "高岡町7-33 寿し高崎屋" },
+            { lat: 36.5794, lng: 136.6521, name: "堀川町6-3" },
+            { lat: 36.5782, lng: 136.6518, name: "此花町4-10 ファング・スクエア" },
+            { lat: 36.5878, lng: 136.6262, name: "北町丁22 らーめん一心屋" },
+            { lat: 36.5606, lng: 136.6520, name: "片町2丁目21-2" },
+            { lat: 36.5613, lng: 136.6517, name: "木倉町1-7" },
+            { lat: 36.6111, lng: 136.6025, name: "大野町4丁目イ170" },
+            { lat: 36.5719, lng: 136.6561, name: "上近江町33-1" },
+            { lat: 36.5780, lng: 136.6481, name: "木ノ新保町1-1-1 金沢百番街 あんと" },
+            { lat: 36.5724, lng: 136.6601, name: "下新町6-18" },
+            { lat: 36.5562, lng: 136.6155, name: "保古3-183-2" },
+            { lat: 36.5780, lng: 136.6481, name: "木ノ新保町1-1" },
+            { lat: 36.5718, lng: 136.6560, name: "上近江町24-1" },
+            { lat: 36.5985, lng: 136.5998, name: "金石上越前町4-15" },
+            { lat: 36.5511, lng: 136.6335, name: "米泉町8丁目8番地" },
+            { lat: 36.5720, lng: 136.6562, name: "下近江町24（近江町市場内）" }
+        ];
+
+        // --- マップ初期化 ---
+        const map = L.map('map').setView([36.578044, 136.648185], 13);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        const floatIcon = L.divIcon({
+            className: 'custom-float-icon',
+            html: `<div class="float-body"><div class="float-top"></div><div class="float-bottom"></div><div class="float-line"></div></div>`,
+            iconSize: [30, 30], iconAnchor: [15, 15]
+        });
+
+        function spawnOneFloat() {
+            const location = SPAWN_LOCATIONS[Math.floor(Math.random() * SPAWN_LOCATIONS.length)];
+            const lat = location.lat;
+            const lng = location.lng;
+            const fish = FISH_DATA[Math.floor(Math.random() * FISH_DATA.length)];
+            const marker = L.marker([lat, lng], { icon: floatIcon }).addTo(map);
+
+            marker.on('click', () => { startMiniGame(fish, marker); });
+
+            setTimeout(() => {
+                const decayTimer = setInterval(() => {
+                    if (!map.hasLayer(marker)) return clearInterval(decayTimer);
+                    if (Math.random() < 0.2) {
+                        map.removeLayer(marker);
+                        clearInterval(decayTimer);
+                    }
+                }, 1000);
+            }, 30000); 
+        }
+
+        function startSpawningCycle() {
+            spawnBatch();
+            setInterval(() => { spawnBatch(); }, 15000);
+        }
+
+        function spawnBatch() {
+            const count = Math.floor(Math.random() * 2) + 1; 
+            for (let i = 0; i < count; i++) spawnOneFloat();
+        }
+        startSpawningCycle();
+
+        // --- 2Dゲームロジック ---
+        let gameActive = false;
+        let currentFish = null;
+        let currentMarker = null;
+
+        const CONTAINER_WIDTH = 300;
+        const CONTAINER_HEIGHT = 400;
+        const FISH_SIZE = 50;
+        const BAR_WIDTH = 70;
+        const BAR_HEIGHT = 90;
+
+        // 魚の座標 (X, Y)
+        let fishX = 125;
+        let fishY = 200;
+        let fishTargetX = 125;
+        let fishTargetY = 200;
+
+        // 枠の座標 (X, Y)
+        let barX = 100;
+        let barY = 0;
+        let targetBarX = 100; // マウス・指が横のどこにあるか
+        let barVelocity = 0;
+        
+        let progress = 0;
+        let isReeling = false;
+
+        let startTime = 0;
+        let nextEscapeCheck = 0;
+
+        const overlay = document.getElementById('game-overlay');
+        const fishingBox = document.getElementById('fishing-box');
+        const barElem = document.getElementById('capture-bar');
+        const fishElem = document.getElementById('fish-icon');
+
+        function resetGameState() {
+            isReeling = false;
+            barVelocity = 0;
+            progress = 0;
+            
+            // 中央にセット
+            fishX = 125; fishY = 200;
+            barX = 100;  barY = 0; targetBarX = 100;
+            
+            document.getElementById('warning-text').style.opacity = 0;
+            fishingBox.classList.remove('danger-border');
+        }
+
+        function startMiniGame(fish, marker) {
+            gameActive = true;
+            currentFish = fish;
+            currentMarker = marker;
+
+            resetGameState();
+            overlay.style.display = 'flex';
+            
+            startTime = Date.now();
+            nextEscapeCheck = TIME_LIMIT + 3; 
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function quitGame() {
+            gameActive = false;
+            resetGameState();
+            overlay.style.display = 'none';
+        }
+
+        function stopGame(success) {
+            gameActive = false;
+            resetGameState();
+            overlay.style.display = 'none'; 
+            
+            const resultOverlay = document.getElementById('result-overlay');
+            const resultImage = document.getElementById('result-image');
+            const resultText = document.getElementById('result-text');
+            
+            if (success) {
+                resultImage.src = currentFish.image;
+                resultText.innerText = `${currentFish.name}を釣り上げた！`;
+                if(currentMarker && map.hasLayer(currentMarker)) map.removeLayer(currentMarker);
+            } else {
+                resultImage.src = ESCAPE_IMAGE;
+                resultText.innerText = "魚を逃がしてしまった...";
+            }
+            resultOverlay.style.display = 'flex';
+        }
+
+        function closeResult() {
+            document.getElementById('result-overlay').style.display = 'none';
+        }
+
+        // --- 新しい操作：マウス＆タッチ連動 ---
+        function updateTargetBarX(clientX) {
+            const rect = fishingBox.getBoundingClientRect();
+            // 釣りエリア内での相対的なX座標を計算し、枠の中心が指にくるようにする
+            let relX = clientX - rect.left;
+            targetBarX = relX - (BAR_WIDTH / 2);
+        }
+
+        // マウス操作
+        overlay.addEventListener('mousedown', (e) => {
+            if(e.target.id === 'close-btn' || e.target.id === 'result-close-btn') return;
+            isReeling = true;
+            updateTargetBarX(e.clientX);
+        });
+        overlay.addEventListener('mousemove', (e) => {
+            if(isReeling) updateTargetBarX(e.clientX);
+        });
+        overlay.addEventListener('mouseup', () => { isReeling = false; });
+
+        // スマホタッチ操作
+        overlay.addEventListener('touchstart', (e) => {
+            if(e.target.id === 'close-btn' || e.target.id === 'result-close-btn') return;
+            isReeling = true;
+            updateTargetBarX(e.touches[0].clientX);
+        });
+        overlay.addEventListener('touchmove', (e) => {
+            if(isReeling) updateTargetBarX(e.touches[0].clientX);
+            // 画面が一緒にスクロールしないようにする
+            e.preventDefault(); 
+        }, { passive: false });
+        overlay.addEventListener('touchend', () => { isReeling = false; });
+
+        // --- メインループ ---
+        function gameLoop() {
+            if (!gameActive) return;
+
+            const elapsedSeconds = (Date.now() - startTime) / 1000;
+
+            if (elapsedSeconds > TIME_LIMIT) {
+                document.getElementById('warning-text').style.opacity = 1;
+                fishingBox.classList.add('danger-border');
+
+                if (elapsedSeconds > nextEscapeCheck) {
+                    nextEscapeCheck += 3;
+                    if (Math.random() < 0.3) {
+                        stopGame(false);
+                        return;
+                    }
+                }
+            }
+
+            // 1. 魚のAI (縦と横の両方にランダムで動く)
+            if (Math.random() < 0.02 * currentFish.difficulty) {
+                fishTargetY = Math.random() * (CONTAINER_HEIGHT - FISH_SIZE);
+                fishTargetX = Math.random() * (CONTAINER_WIDTH - FISH_SIZE);
+            }
+            
+            const speed = currentFish.speed;
+            
+            // 魚の縦移動
+            if (fishY < fishTargetY) fishY += Math.random() * speed;
+            if (fishY > fishTargetY) fishY -= Math.random() * speed;
+            fishY = Math.max(0, Math.min(CONTAINER_HEIGHT - FISH_SIZE, fishY));
+
+            // 魚の横移動 (横は少し控えめな速度で)
+            if (fishX < fishTargetX) fishX += Math.random() * (speed * 0.8);
+            if (fishX > fishTargetX) fishX -= Math.random() * (speed * 0.8);
+            fishX = Math.max(0, Math.min(CONTAINER_WIDTH - FISH_SIZE, fishX));
+
+            // 2. 枠の物理挙動
+            // 縦（重力と引き上げ）
+            if (isReeling) barVelocity += 0.5;
+            else barVelocity -= 0.4;
+            barVelocity *= 0.9;
+            barY += barVelocity;
+            if (barY < 0) { barY = 0; barVelocity = 0; }
+            if (barY > CONTAINER_HEIGHT - BAR_HEIGHT) { barY = CONTAINER_HEIGHT - BAR_HEIGHT; barVelocity = 0; }
+
+            // 横（指の位置へ滑らかに追従）
+            barX += (targetBarX - barX) * 0.3; 
+            barX = Math.max(0, Math.min(CONTAINER_WIDTH - BAR_WIDTH, barX));
+
+            // 3. 2D 判定 (魚の中心が枠の中にあるか)
+            const barBottom = barY;
+            const barTop = barY + BAR_HEIGHT;
+            const barLeft = barX;
+            const barRight = barX + BAR_WIDTH;
+
+            const fishCenterY = (CONTAINER_HEIGHT - fishY) - (FISH_SIZE / 2);
+            const fishCenterX = fishX + (FISH_SIZE / 2);
+
+            const isCatching = 
+                (fishCenterY < barTop && fishCenterY > barBottom) && 
+                (fishCenterX > barLeft && fishCenterX < barRight);
+
+            // 4. 進捗
+            if (isCatching) {
+                progress += 0.5; 
+                barElem.style.backgroundColor = "rgba(100, 255, 100, 0.5)"; // 緑
+            } else {
+                progress -= 0.15; 
+                barElem.style.backgroundColor = "rgba(255, 100, 100, 0.4)"; // 赤
+            }
+
+            if (progress < 0) progress = 0;
+            if (progress >= 100) {
+                stopGame(true);
+                return;
+            }
+
+            // 5. 描画
+            fishElem.style.top = fishY + 'px';
+            fishElem.style.left = fishX + 'px';
+            
+            barElem.style.bottom = barY + 'px';
+            barElem.style.left = barX + 'px';
+
+            const progressBar = document.getElementById('progress-bar');
+            progressBar.style.height = progress + '%';
+            
+            if (progress > 80) progressBar.style.background = 'lime';
+            else if (progress > 40) progressBar.style.background = 'yellow';
+            else progressBar.style.background = 'red';
+
+            requestAnimationFrame(gameLoop);
+        }
+    </script>
+</body>
+</html>

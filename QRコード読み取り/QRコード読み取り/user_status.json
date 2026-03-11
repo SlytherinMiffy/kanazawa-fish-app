@@ -1,0 +1,9 @@
+{
+    "visited_count": 1,
+    "visited_shops": [
+        "001"
+    ],
+    "coupons_earned": 0,
+    "shops_until_next_coupon": 4,
+    "is_complete": false
+}

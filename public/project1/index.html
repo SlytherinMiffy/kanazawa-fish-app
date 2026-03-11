@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>金沢市マップ</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    crossorigin=""
+  >
+  <link rel="stylesheet" href="styles.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="map-page">
+  <div class="quiz-container map-shell">
+    <main class="quiz-main map-main">
+      <div class="map-intro map-fullscreen" id="mapIntro">
+        <div class="go-map" id="goMap" aria-label="金沢市の地図"></div>
+
+        <div class="map-overlay">
+          <details class="map-settings-menu" id="mapSettingsMenu">
+            <summary>メニュー</summary>
+            <div class="map-menu-actions">
+              <button type="button" class="btn btn-secondary" id="openSettingsModalBtn">設定</button>
+            </div>
+          </details>
+
+          <div class="map-control-panel hidden">
+            <p class="map-hint">座標入力はメニューの「設定」から変更できます。目的地付近ならクイズ案内のポップアップが表示されます。</p>
+            <p class="map-gps-status" id="gpsStatusText">座標を入力すると場所を地図に表示できます。</p>
+            <p class="map-selected hidden" id="selectedAreaText">選択エリア: 金沢駅</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="quiz-modal hidden" id="quizModal" role="dialog" aria-modal="true" aria-label="クイズ">
+    <div class="quiz-modal-backdrop" id="quizModalBackdrop"></div>
+    <div class="quiz-modal-content">
+      <button type="button" class="quiz-modal-close" id="closeQuizModalBtn" aria-label="クイズを閉じる">×</button>
+      <iframe class="quiz-modal-frame" id="quizModalFrame" title="クイズ"></iframe>
+    </div>
+  </div>
+
+  <div class="settings-modal hidden" id="settingsModal" role="dialog" aria-modal="true" aria-label="設定">
+    <div class="settings-modal-backdrop" id="settingsModalBackdrop"></div>
+    <div class="settings-modal-content">
+      <button type="button" class="settings-modal-close" id="closeSettingsModalBtn" aria-label="設定を閉じる">×</button>
+      <h2 class="settings-modal-title">設定</h2>
+      <div class="map-coordinate-form">
+        <label class="map-coordinate-label" for="coordinateInput">外部で取得した座標</label>
+        <div class="map-coordinate-controls">
+          <input type="text" class="map-coordinate-input" id="coordinateInput" placeholder="例: 36.561325, 136.656205">
+          <button type="button" class="btn btn-secondary" id="applyCoordinateBtn">座標を反映</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="map.js"></script>
+</body>
+</html>
