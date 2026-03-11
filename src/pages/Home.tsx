@@ -344,7 +344,7 @@ export function Home() {
                     <div className="flex flex-col min-w-0">
                         <span className="text-[9px] sm:text-[10px] font-extrabold text-cyan-500 tracking-widest hidden sm:block leading-none mb-1 opacity-80">KANAZAWA FISH GUIDE</span>
                         <h1 className="text-xl sm:text-2xl font-black bg-clip-text text-transparent bg-gradient-to-br from-blue-800 via-blue-600 to-cyan-500 tracking-tighter truncate drop-shadow-sm leading-tight">
-                            石川魚通ガイド
+                            金沢魚通ガイド
                         </h1>
                     </div>
                 </div>
@@ -417,20 +417,20 @@ export function Home() {
             {showStampMenu && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pointer-events-auto">
                     {/* Backdrop */}
-                    <div 
+                    <div
                         className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity"
                         onClick={() => setShowStampMenu(false)}
                     ></div>
-                    
+
                     {/* Modal Content */}
                     <div className="relative bg-white/95 backdrop-blur-xl rounded-[32px] p-6 w-full max-w-sm shadow-2xl border border-white/50 flex flex-col gap-4 animate-fade-in-up">
                         <div className="text-center mb-2">
                             <h3 className="text-xl font-black text-teal-700 tracking-tight">スタンプメニュー</h3>
                             <p className="text-sm text-teal-600/70 font-bold mt-1">どちらを行いますか？</p>
                         </div>
-                        
-                        <Link 
-                            to="/scanner" 
+
+                        <Link
+                            to="/scanner"
                             className="bg-gradient-to-r from-teal-500 to-emerald-400 p-4 rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all text-white flex items-center gap-4 group"
                         >
                             <div className="bg-white/20 p-3 rounded-xl group-hover:scale-110 transition-transform">
@@ -442,8 +442,8 @@ export function Home() {
                             </div>
                         </Link>
 
-                        <Link 
-                            to="/stamps" 
+                        <Link
+                            to="/stamps"
                             className="bg-gradient-to-r from-amber-500 to-orange-400 p-4 rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all text-white flex items-center gap-4 group"
                         >
                             <div className="bg-white/20 p-3 rounded-xl group-hover:scale-110 transition-transform">
@@ -454,8 +454,8 @@ export function Home() {
                                 <p className="text-xs text-white/90 font-medium">集めたスタンプの種類を確認</p>
                             </div>
                         </Link>
-                        
-                        <button 
+
+                        <button
                             onClick={() => setShowStampMenu(false)}
                             className="mt-2 py-3 rounded-xl font-bold text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors w-full"
                         >
@@ -469,20 +469,20 @@ export function Home() {
             {showGameMenu && (
                 <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 pointer-events-auto">
                     {/* Backdrop */}
-                    <div 
+                    <div
                         className="absolute inset-0 bg-gray-900/40 backdrop-blur-sm transition-opacity"
                         onClick={() => setShowGameMenu(false)}
                     ></div>
-                    
+
                     {/* Modal Content */}
                     <div className="relative bg-white/95 backdrop-blur-xl rounded-[32px] p-6 w-full max-w-sm shadow-2xl border border-white/50 flex flex-col gap-4 animate-fade-in-up">
                         <div className="text-center mb-2">
                             <h3 className="text-xl font-black text-orange-600 tracking-tight">ゲームメニュー</h3>
                             <p className="text-sm text-orange-600/70 font-bold mt-1">どちらで遊びますか？</p>
                         </div>
-                        
-                        <Link 
-                            to="/game" 
+
+                        <Link
+                            to="/game"
                             className="bg-gradient-to-r from-orange-500 to-amber-400 p-4 rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all text-white flex items-center gap-4 group"
                         >
                             <div className="bg-white/20 p-3 rounded-xl group-hover:scale-110 transition-transform flex-shrink-0 w-14 h-14 flex items-center justify-center">
@@ -494,8 +494,8 @@ export function Home() {
                             </div>
                         </Link>
 
-                        <Link 
-                            to="/quiz-game" 
+                        <Link
+                            to="/quiz-game"
                             className="bg-gradient-to-r from-blue-500 to-cyan-400 p-4 rounded-2xl shadow-md hover:shadow-lg hover:-translate-y-0.5 transition-all text-white flex items-center gap-4 group"
                         >
                             <div className="bg-white/20 p-3 rounded-xl group-hover:scale-110 transition-transform flex-shrink-0 w-14 h-14 flex items-center justify-center">
@@ -506,8 +506,8 @@ export function Home() {
                                 <p className="text-xs text-white/90 font-medium whitespace-nowrap overflow-hidden text-ellipsis">金沢名所でクイズに挑戦！</p>
                             </div>
                         </Link>
-                        
-                        <button 
+
+                        <button
                             onClick={() => setShowGameMenu(false)}
                             className="mt-2 py-3 rounded-xl font-bold text-gray-500 hover:bg-gray-100 hover:text-gray-700 transition-colors w-full"
                         >
