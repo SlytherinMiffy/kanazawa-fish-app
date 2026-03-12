@@ -33,7 +33,7 @@ export function Chat() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     messages: [
-                        { role: 'system', content: 'あなたは石川県金沢市の親切な観光コンシェルジュにして、豪快なベテラン漁師です。語尾に「〜だぞ」「〜だな」等を使い、魚釣りや金沢観光について親切に教えます。' },
+                        { role: 'system', content: '' },
                         ...messages.map(m => ({
                             role: m.sender === 'user' ? 'user' : 'assistant',
                             content: m.text
@@ -84,11 +84,11 @@ export function Chat() {
                 <div className="relative">
                     {/* Avatar larger */}
                     <div className="w-20 h-20 bg-[#D7E3E5] rounded-full flex items-center justify-center overflow-hidden border-4 border-white/90 shadow-[0_0_15px_rgba(0,0,0,0.2)] shrink-0 relative z-10">
-                        <img src="/fish_picture/Concierge.png" alt="コンシェルジュ" className="w-[115%] h-[115%] max-w-none object-cover" />
+                        <img src="/fish_picture/Concierge.png" alt="コンシェルジュ" className="w-[145%] h-[145%] max-w-none object-cover" />
                     </div>
                 </div>
                 <div className="flex flex-col justify-center">
-                    <h1 className="text-xl font-extrabold tracking-wide drop-shadow-md">コンシェルジュ</h1>
+                    <h1 className="text-xl font-extrabold tracking-wide drop-shadow-md">漁通コンシェルジュ</h1>
                 </div>
             </header>
 
@@ -98,7 +98,7 @@ export function Chat() {
                     <div key={msg.id} className={`flex gap-3 max-w-[90%] ${msg.sender === 'user' ? 'self-end flex-row-reverse' : 'self-start'}`}>
                         {msg.sender === 'fisher' && (
                             <div className="w-14 h-14 rounded-full bg-[#D7E3E5] shrink-0 flex items-center justify-center border-2 border-white shadow-[0_2px_8px_rgba(0,0,0,0.1)] overflow-hidden self-end mb-1">
-                                <img src="/fish_picture/Concierge.png" alt="コンシェルジュ" className="w-[115%] h-[115%] max-w-none object-cover" />
+                                <img src="/fish_picture/Concierge.png" alt="コンシェルジュ" className="w-[145%] h-[145%] max-w-none object-cover" />
                             </div>
                         )}
                         <div className={`p-4 rounded-3xl shadow-sm relative ${msg.sender === 'user'
@@ -114,7 +114,7 @@ export function Chat() {
                 {isLoading && (
                     <div className="flex gap-3 max-w-[90%] self-start animate-fade-in">
                         <div className="w-14 h-14 rounded-full bg-[#D7E3E5] shrink-0 flex items-center justify-center border-2 border-white shadow-[0_2px_8px_rgba(0,0,0,0.1)] overflow-hidden self-end mb-1">
-                            <img src="/fish_picture/Concierge.png" alt="コンシェルジュ" className="w-[115%] h-[115%] max-w-none object-cover" />
+                            <img src="/fish_picture/Concierge.png" alt="コンシェルジュ" className="w-[145%] h-[145%] max-w-none object-cover" />
                         </div>
                         <div className="p-4 rounded-3xl shadow-sm bg-white text-gray-800 rounded-bl-sm border border-gray-100/50 shadow-[0_4px_15px_rgba(0,0,0,0.03)] flex items-center gap-1.5 h-[52px] my-auto">
                             <div className="w-2.5 h-2.5 bg-indigo-400 rounded-full animate-bounce"></div>
@@ -127,11 +127,11 @@ export function Chat() {
 
             {/* Input Area (Floating Glassmorphism) */}
             <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-slate-50 via-slate-50/90 to-transparent">
-                
+
                 {/* 質問提案チップ */}
                 {messages.length === 1 && (
-                    <div 
-                        className="flex overflow-x-auto gap-2 mb-3 pb-1 -mx-2 px-2 [&::-webkit-scrollbar]:hidden" 
+                    <div
+                        className="flex overflow-x-auto gap-2 mb-3 pb-1 -mx-2 px-2 [&::-webkit-scrollbar]:hidden"
                         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                     >
                         {['おすすめの鮮魚市場を教えて', '朝食が食べられる場所は？', '寿司レストランを探しています', '市場の営業時間は？'].map((suggestion, idx) => (
