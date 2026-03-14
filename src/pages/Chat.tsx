@@ -27,21 +27,18 @@ export function Chat() {
         setIsLoading(true);
 
         try {
-            // ローカルLLMのOpenAI互換APIエンドポイント
-            const response = await fetch('http://localhost:1234/v1/chat/completions', {
+            // FastAPI バックエンド (api.py) を呼び出す
+            const response = await fetch('http://localhost:8000/api/chat', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     messages: [
-                        { role: 'system', content: '' },
                         ...messages.map(m => ({
                             role: m.sender === 'user' ? 'user' : 'assistant',
                             content: m.text
                         })),
                         { role: 'user', content: messageToProcess }
-                    ],
-                    temperature: 0.7,
-                    max_tokens: 500
+                    ]
                 })
             });
 
@@ -50,7 +47,8 @@ export function Chat() {
             }
 
             const data = await response.json();
-            const replyText = data.choices[0].message.content;
+            // FastAPI側で "reply" キーに返答を詰めている想定
+            const replyText = data.reply;
 
             const fisherMsg: ChatMessage = {
                 id: Date.now(),
@@ -62,7 +60,7 @@ export function Chat() {
             console.error('LLM Fetch Error:', error);
             const errorMsg: ChatMessage = {
                 id: Date.now(),
-                text: '（通信エラー: ローカルLLMに接続できませんでした。サーバーがポート1234等で起動しているか確認してくれ！）',
+                text: '（通信エラー: バックエンドサーバーに接続できませんでした。PythonのFastAPIサーバーがポート8000で起動しているか確認してください！）',
                 sender: 'fisher'
             };
             setMessages(prev => [...prev, errorMsg]);

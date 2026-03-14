@@ -10,24 +10,42 @@
 
 ## 始め方
 
-### 1. 依存関係のインストール
+このアプリは **フロントエンド（React/Vite）** と **バックエンド（FastAPI/Python）** の2つを同時に起動する必要があります。
+
+### 1. フロントエンドの起動準備
 ネットワーク環境が安定している状態で以下を実行してください。
 ```bash
 npm install
 ```
 ※もしエラーが出る場合は、プロキシ設定やネットワーク接続を確認してください。
 
-### 2. アプリの起動
+### 2. バックエンド（AIコンシェルジュ）の起動準備
+チャット機能を利用するためには、Python環境と以下のライブラリが必要です。
+あらかじめインストールしておいてください。
 ```bash
+pip install fastapi uvicorn
+```
+その他、`llama_cpp` や `langchain_huggingface` など、`api.py` で利用しているパッケージも環境に合わせてインストールしてください。
+
+### 3. アプリケーションの起動方法
+ターミナルを2つ開いて、それぞれ以下のコマンドを実行します。
+
+**ターミナル1（バックエンド起動用）**
+```bash
+# プロジェクトのルートディレクトリに移動して実行
+uvicorn api:app --reload
+```
+※モデルの読み込みに少し時間がかかります。「Application startup complete.」と表示されれば準備完了です。
+
+**ターミナル2（フロントエンド起動用）**
+```bash
+# プロジェクトのルートディレクトリに移動して実行
 npm run dev
 ```
-ブラウザで `http://localhost:5173` を開くとアプリが利用できます。
 
-## 注意事項 - Mockモード
-現在、PHPバックエンドが利用できない環境向けに、認証機能はブラウザの `localStorage` を使用した **Mockモード** で動作しています。
-- 登録したユーザー情報はブラウザ内に保存されます。
-- サーバー（PHP）は不要で動作します。
+両方の起動が完了したら、ブラウザで `http://localhost:5173` を開くとアプリが利用できます。
 
 ## 構成
 - **Frontend**: React, TypeScript, Tailwind CSS
-- **Routing**: Internal State Router
+- **Backend / AI**: FastAPI, Llama.cpp, LangChain, Chroma
+- **Authentication / DB**: Firebase Auth & Firestore

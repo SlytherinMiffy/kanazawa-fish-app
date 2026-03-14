@@ -408,8 +408,8 @@ export function Game() {
                             <div className="water-bg absolute inset-0 opacity-30 pointer-events-none"></div>
                             <h2 className="absolute top-2 w-full text-center text-white/50 text-sm font-bold m-0 pointer-events-none">？？？</h2>
                             {/* 魚のアイコン */}
-                            <div ref={fishIconRef} className="absolute w-[50px] h-[50px] bg-gray-800 rounded-full flex justify-center items-center text-2xl text-white pointer-events-none">
-                                🐟
+                            <div ref={fishIconRef} className="absolute w-[50px] h-[50px] pointer-events-none drop-shadow-lg flex justify-center items-center">
+                                <img src="/fish_picture/fish_silhouette.png" alt="魚のシルエット" className="w-[120%] h-[120%] max-w-none object-contain drop-shadow" />
                             </div>
                             {/* キャプチャーバー（自機） */}
                             <div ref={captureBarRef} className="absolute w-[70px] h-[90px] bg-green-400/60 border-2 border-green-500 rounded-xl pointer-events-none box-border"></div>
